@@ -102,3 +102,32 @@ CREATE TABLE scam_reports (
         OR merged_into_id IS NOT NULL
     )
 );
+
+CREATE INDEX idx_reports_search ON scam_reports USING gin (search_vector);
+
+CREATE INDEX idx_reports_public ON scam_reports (category_id, approved_at DESC)
+WHERE
+    status = 'approved';
+
+CREATE INDEX idx_reports_queue ON scam_reports (created_at)
+WHERE
+    status = 'pending_review';
+-- Only one open group per sender+category, so new submissions attach to it
+CREATE UNIQUE INDEX uq_reports_open_group ON scam_reports (sender_id, category_id)
+WHERE
+    sender_id IS NOT NULL
+    AND status IN (
+        'collecting',
+        'pending_review'
+    );
+
+CREATE TABLE report_submissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+    report_id UUID NOT NULL REFERENCES scam_reports (id) ON DELETE CASCADE,
+    submitter_id UUID REFERENCES users (id), -- NULL = anonymous
+    redacted_content TEXT NOT NULL,
+    redaction_count SMALLINT NOT NULL DEFAULT 0, -- shown as "2 personal details masked"
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_submissions_report ON report_submissions (report_id);
