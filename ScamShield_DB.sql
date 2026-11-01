@@ -1,5 +1,12 @@
 -- ScamShield schema (PostgreSQL 14+)
 
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- fuzzy sender / keyword search / helps users search for with typos
+
 -- ---------------------------------------------------------------
 -- Accounts and roles (public visitors are anonymous and have no row)
 -- ---------------------------------------------------------------
