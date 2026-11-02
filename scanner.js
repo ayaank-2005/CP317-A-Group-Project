@@ -245,7 +245,7 @@ async function scanMessage() {
 
     // If submission type is phone number, it is checked through the public database
     if (validation.type === "phone") {
-        window.location.hash = CONFIG.DB_ROUTE;
+        window.location.hash = `${CONFIG.DB_ROUTE}?q=${encodeURIComponent(value)}`;
         return;
     }
 
