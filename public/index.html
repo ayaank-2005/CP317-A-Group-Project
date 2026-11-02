@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <title>ScamShield – Stay Secured and  Online</title>
+
+
+    <link rel="stylesheet" href="Styling.css">
+</head>
+
+<body>
+    <div class="wrap">
+
+        <header class="top">
+            <div class="brand">Scam Shield</div>
+
+            <nav aria-label="Main">
+                <a href="#home" data-view="home">Home</a>
+                <a href="#database" data-view="database">Database</a>
+                <a href="#report" data-view="report">Report</a>
+                <a href="#sign-in" data-view="sign-in" class="signin">
+                    Sign in
+                </a>
+            </nav>
+        </header>
+
+        <main id="v-scan">
+            <h1>Check a message before you respond?</h1>
+
+            <p class="lede">
+                Paste a text, email, link or phone number and we’ll check it
+                for signs of a scam.
+            </p>
+
+            <div class="panel">
+                <label class="field" for="input">
+                    Message, link or phone number
+                </label>
+
+                <textarea
+                    id="input"
+                    placeholder="Paste a suspicious message, a link, or a phone number"
+                ></textarea>
+
+                <div class="row">
+                    <button class="primary" id="scanBtn" type="button">
+                        Scan now
+                    </button>
+
+                    <button id="clearBtn" type="button">
+                        Clear
+                    </button>
+
+                    <span class="kind" id="kind" aria-live="polite"></span>
+                </div>
+
+                <div class="row">
+                    <button type="button" id="databaseBtn">
+                        Search Known Scams
+                    </button>
+
+                    <button type="button" id="reportBtn">
+                        Report a Scam
+                    </button>
+                </div>
+
+                <div class="err" id="err" role="alert"></div>
+
+                <p class="hint note">
+                    Only a phone number? We’ll take you to the Public Scam Database.
+                </p>
+            </div>
+
+            <div id="result" aria-live="polite"></div>
+        </main>
+
+        <main id="v-db" class="hidden"></main>
+
+        <main id="v-report" class="hidden"></main>
+
+        <main id="v-signin" class="hidden"></main>
+
+    </div>
+
+    <script src="scanner.js"></script>
+</body>
+</html>
