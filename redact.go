@@ -25,6 +25,14 @@ var rules = []rule{
 		label:   "[PHONE]",
 	},
 	{
+		pattern: regexp.MustCompile(`\b[0-9](?:[ -]?[0-9]){12,15}\b`),
+		label:   "[CARD]",
+	},
+	{
+		pattern: regexp.MustCompile(`\b[0-9]{3}[ -][0-9]{3}[ -][0-9]{3}\b`),
+		label:   "[SIN]",
+	},
+	{
 		pattern: regexp.MustCompile(`(?i)\b[0-9]{1,6}[ \t]+(?:[A-Z][A-Z.'’-]*[ \t]+){1,5}(?:street|st|road|rd|avenue|ave|drive|dr|lane|ln|court|ct|boulevard|blvd|crescent|cres)\b(?:[ \t]+(?:north|south|east|west|n|s|e|w)\b)?(?:,?[ \t]+(?:unit|apt\.?|suite)[ \t]+[A-Z0-9-]+)?`),
 		label:   "[ADDRESS]",
 	},
