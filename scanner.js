@@ -1,7 +1,7 @@
 
 
 const CONFIG = {
-    ENGINE_URL: null,
+    ENGINE_URL: "/api/scan",
     TIMEOUT: 20000,
     DB_ROUTE: "#database",
     MIN_TEXT_LENGTH: 10,
