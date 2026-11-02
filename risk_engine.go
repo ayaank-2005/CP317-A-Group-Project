@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+// ---- Tuning knobs: change scores here ----
+const (
+	urlReputationWeight = 50.0
+	mediumThreshold     = 30.0
+	highThreshold       = 60.0
+)
+
 // Input is what every rule sees. Built by the handler after validation.
 type Input struct {
 	Type string // "text" | "url" | "email"
@@ -17,8 +24,10 @@ type Input struct {
 }
 
 // Rule is one check. Add a new rule by adding a type that implements this.
+// Added Weighting rule. 
 type Rule interface {
 	Code() string
+	Weight() float64
 	Match(in Input) bool
 }
 
@@ -31,15 +40,18 @@ type Reputation interface {
 
 type regexRule struct {
 	code string
+	weight float64
 	re   *regexp.Regexp
 }
 
 func (r regexRule) Code() string        { return r.code }
+func (r regexRule) Weight() float64     { return r.weight }
 func (r regexRule) Match(in Input) bool { return r.re.MatchString(in.Text) }
 
 type shortURLRule struct{}
 
 func (shortURLRule) Code() string { return "SHORT_URL" }
+func (shortURLRule) Weight() float64 { return 15 }
 func (shortURLRule) Match(in Input) bool {
 	shorteners := map[string]bool{"bit.ly": true, "tinyurl.com": true, "t.co": true, "is.gd": true}
 	for _, raw := range in.URLs {
@@ -50,11 +62,12 @@ func (shortURLRule) Match(in Input) bool {
 	return false
 }
 
+// Defaults lists every rule with its weight in one place.
 func Defaults() []Rule {
 	return []Rule{
-		regexRule{"URGENT_LANGUAGE", regexp.MustCompile(`(?i)act now|within 24 hours|final notice|account (will be )?suspended`)},
-		regexRule{"GIFT_CARD", regexp.MustCompile(`(?i)gift ?cards?`)},
-		regexRule{"PAYMENT_REQUEST", regexp.MustCompile(`(?i)wire transfer|e-?transfer|bitcoin|crypto`)},
+		regexRule{"URGENT_LANGUAGE", 15, regexp.MustCompile(`(?i)act now|within 24 hours|final notice|account (will be )?suspended`)},
+		regexRule{"GIFT_CARD", 35, regexp.MustCompile(`(?i)gift ?cards?`)},
+		regexRule{"PAYMENT_REQUEST", 25, regexp.MustCompile(`(?i)wire transfer|e-?transfer|bitcoin|crypto`)},
 		shortURLRule{},
 	}
 }
@@ -70,12 +83,11 @@ type Result struct {
 
 type Engine struct {
 	rules   []Rule
-	weights map[string]float64 // loaded from the risk_rules table
 	rep     Reputation         // may be nil
 }
 
-func NewEngine(rules []Rule, weights map[string]float64, rep Reputation) *Engine {
-	return &Engine{rules: rules, weights: weights, rep: rep}
+func NewEngine(rules []Rule, rep Reputation) *Engine {
+	return &Engine{rules: rules, rep: rep}
 }
 
 func (e *Engine) Assess(ctx context.Context, in Input) Result {
@@ -101,7 +113,7 @@ func (e *Engine) Assess(ctx context.Context, in Input) Result {
 	for _, r := range e.rules {
 		if r.Match(in) {
 			res.Reasons = append(res.Reasons, r.Code())
-			res.Score += e.weights[r.Code()]
+			res.Score += r.Weight()
 		}
 	}
 
@@ -115,7 +127,7 @@ func (e *Engine) Assess(ctx context.Context, in Input) Result {
 			case o.bad:
 				res.URLCheck = "ok"
 				res.Reasons = append(res.Reasons, "URL_REPUTATION")
-				res.Score += e.weights["URL_REPUTATION"]
+				res.Score += urlReputationWeight
 			default:
 				res.URLCheck = "ok"
 			}
@@ -128,10 +140,10 @@ func (e *Engine) Assess(ctx context.Context, in Input) Result {
 		res.Score = 100
 	}
 	switch {
-	case res.Score >= 60:
+	case res.Score >= highThreshold:
 		res.Level = "high"
 	case res.Score >= 30:
-		res.Level = "medium"
+		res.Level = "mediumThreshold"
 	default:
 		res.Level = "low"
 	}
