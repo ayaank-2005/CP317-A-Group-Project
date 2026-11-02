@@ -1,0 +1,611 @@
+
+/* Colouring of the website and its features */
+
+:root {
+    --bg: hsl(37, 45%, 92%);
+    --surface: hsl(39, 100%, 97%);
+    --ink: hsl(0, 0%, 9%);
+    --muted: hsl(30, 10%, 38%);
+    --line: hsl(32, 39%, 78%);
+
+    --accent: hsl(137, 53%, 31%);
+    --accent-ink: hsl(0, 0%, 100%);
+
+    --ok: hsl(137, 53%, 31%);
+    --okbg: hsl(94, 27%, 89%);
+
+    --warn: hsl(34, 55%, 37%);
+    --warnbg: hsl(37, 62%, 86%);
+
+    --bad: hsl(357, 82%, 39%);
+    --badbg: hsl(14, 48%, 91%);
+
+    color-scheme: light;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* prevents automatic text resizing on mobile devices */
+
+html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+    -webkit-text-size-adjust: 100%;
+}
+
+/* Applies border-box sizing to all elements */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Sets the main page layout, background, text colour, and font */
+
+body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 16px/1.55 Arial, Helvetica, sans-serif;
+}
+
+/* Centres content and limits the max width. */
+
+.wrap {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+}
+
+/* styling for the main heading */
+
+h1 {
+    font-size: clamp(30px, 6vw, 44px);
+    line-height: 1.05;
+    letter-spacing: -.025em;
+    font-weight: 800;
+    color: #c4161c;
+    margin: 0 0 10px;
+}
+
+/* styling for secondary headings */
+
+h2 {
+    font-size: 19px;
+    margin: 0 0 8px;
+}
+
+/* Styles text below main heading*/
+
+.lede {
+    color: var(--ink);
+    margin: 0 0 22px;
+    max-width: 56ch;
+}
+
+/* Styles the supporting text*/
+
+.hint {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+
+.flush {
+    margin: 0;
+}
+
+
+.note {
+    margin: 10px 0 0;
+}
+
+/* Hides the sections that are not supposed to be shown currently */
+
+.hidden {
+    display: none;
+}
+
+/* Header and navigation styling */
+
+
+.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 18px;
+    margin-bottom: 32px;
+    border-bottom: 2px solid #171717;
+}
+
+/* Styles the Scam Shield name  */
+
+.brand {
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -.01em;
+    color: var(--ink);
+}
+
+/* Displays the navigation links/tabs */
+
+nav {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+}
+
+/* Styles naviagation links */
+
+nav a {
+    color: var(--ink);
+    text-decoration: none;
+    padding: 7px 15px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+
+nav a:hover {
+    color: var(--muted);
+}
+
+
+nav a[aria-current="page"] {
+    background: #171717;
+    color: #ffffff;
+}
+
+
+nav a.signin {
+    margin-left: 6px;
+    border: 1.5px solid var(--line);
+    color: var(--ink);
+}
+
+
+nav a.signin[aria-current="page"] {
+    border-color: #171717;
+    background: #171717;
+    color: #ffffff;
+}
+
+
+nav a:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Main content */
+
+/* Styles the main input panel and the buttons below it */
+
+.panel {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+}
+
+
+label.field {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+
+textarea {
+    display: block;
+    width: 100%;
+    min-height: 150px;
+    resize: vertical;
+    font: inherit;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1.5px solid var(--ink);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+/* Placeholder text colour */
+
+textarea::placeholder {
+    color: #81786e;
+}
+
+/* Arrangement of the buttons */
+
+.row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 12px;
+}
+
+/* Styling of the buttons */
+
+button {
+    font: inherit;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 18px;
+    border: 1.5px solid var(--ink);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+}
+
+button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+}
+
+
+button.primary:hover {
+    background: hsl(137, 53%, 25%);
+    border-color: hsl(137, 53%, 25%);
+}
+
+
+button:disabled {
+    opacity: .6;
+    cursor: progress;
+}
+
+
+button:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Styling for label that shows what the input type is */
+
+.kind {
+    display: inline-block;
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+/* Styling for the validation and scanning error messages */
+
+.err {
+    display: none;
+    color: var(--bad);
+    background: var(--badbg);
+    border: 1px solid var(--bad);
+    border-left: 5px solid var(--bad);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Styling for the Results */
+
+#result {
+    margin-top: 24px;
+}
+
+/* The layout for scan result messages */
+
+.state {
+    background: var(--surface);
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    padding: 18px;
+}
+
+/* Scan fail, border colour changed to red */
+
+.state.fail {
+    border-style: solid;
+    border-color: var(--bad);
+}
+
+
+.state h2 {
+    margin-bottom: 4px;
+}
+
+
+
+/* Gives main container for the scam risk result and it. */
+
+.verdict {
+    border-radius: 14px;
+    padding: 20px;
+    border: 1.5px solid;
+}
+
+/* Styling for risk engine results*/
+
+.verdict.low {
+    background: var(--okbg);
+    color: var(--ok);
+    border-color: var(--ok);
+}
+
+
+.verdict.medium {
+    background: var(--warnbg);
+    color: var(--warn);
+    border-color: var(--warn);
+}
+
+
+
+.verdict.high {
+    background: var(--badbg);
+    color: var(--bad);
+    border-color: var(--bad);
+}
+
+
+.verdict .big {
+    font-size: clamp(34px, 8vw, 54px);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: 1;
+}
+
+
+.verdict p {
+    margin: 8px 0 0;
+    color: var(--ink);
+}
+
+
+.meter {
+    position: relative;
+    height: 12px;
+    border-radius: 99px;
+    margin: 18px 0 4px;
+    background: linear-gradient(
+        90deg,
+        var(--ok) 0 25%,
+        var(--warn) 25% 55%,
+        var(--bad) 55% 100%
+    );
+}
+
+
+/* Risk score indicator and result styling, is temp will need to be adjusted */
+
+.meter i {
+    position: absolute;
+    top: -5px;
+    width: 6px;
+    height: 22px;
+    border-radius: 3px;
+    background: var(--ink);
+    transform: translateX(-50%);
+    border: 2px solid var(--surface);
+}
+
+.scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.sec {
+    margin-top: 20px;
+}
+
+/* Warning flags returned by the backend */
+
+ul.flags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+ul.flags li {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--warn);
+    border-radius: 10px;
+    padding: 12px 14px;
+    overflow-wrap: anywhere;
+}
+
+ul.flags li.severe {
+    border-left-color: var(--bad);
+}
+
+ul.flags li b {
+    display: block;
+}
+
+ul.flags li span {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* URL display and reputation labels */
+
+.urlbox {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    overflow-wrap: anywhere;
+}
+
+.tag {
+    display: inline-block;
+    border-radius: 6px;
+    padding: 1px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.tag.clean {
+    background: var(--okbg);
+    color: var(--ok);
+}
+
+.tag.suspicious {
+    background: var(--warnbg);
+    color: var(--warn);
+}
+
+.tag.malicious {
+    background: var(--badbg);
+    color: var(--bad);
+}
+
+.tag.unknown {
+    background: var(--bg);
+    color: var(--muted);
+}
+
+/* Tablet layout scaling/sizing adjusments */
+
+@media (max-width: 768px) {
+    .wrap {
+        max-width: 100%;
+        padding: 26px 20px 48px;
+    }
+
+    .top {
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+
+    nav {
+        max-width: 100%;
+    }
+}
+
+/* Mobile layout scaling adjustments */
+
+@media (max-width: 520px) {
+    body {
+        font-size: 15px;
+    }
+
+    .wrap {
+        padding: 20px 16px 40px;
+    }
+
+    .top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .brand {
+        font-size: 19px;
+    }
+
+    nav {
+        width: 100%;
+        border-radius: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 3px;
+    }
+
+    nav a {
+        flex: 1 1 auto;
+        text-align: center;
+        padding: 9px 10px;
+        font-size: 14px;
+    }
+
+    nav a.signin {
+        margin-left: 0;
+    }
+
+    h1 {
+        font-size: clamp(29px, 9vw, 38px);
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    .panel {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    textarea {
+        min-height: 130px;
+        font-size: 16px;
+    }
+
+    .row {
+        align-items: stretch;
+    }
+
+    .row button {
+        flex: 1 1 auto;
+    }
+
+    button {
+        min-height: 44px;
+        padding: 10px 14px;
+    }
+
+    .kind {
+        margin-left: 0;
+    }
+
+    .verdict {
+        padding: 16px;
+    }
+
+    .state {
+        padding: 15px;
+    }
+
+    .urlbox {
+        padding: 10px 12px;
+    }
+}
+
+/* adjustments for smaller phones */
+
+@media (max-width: 360px) {
+    .wrap {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    nav a {
+        padding: 8px 7px;
+        font-size: 13px;
+    }
+
+    .panel {
+        padding: 13px;
+    }
+}
