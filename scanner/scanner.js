@@ -253,7 +253,7 @@ async function scanMessage() {
 
     // If submission type is phone number, it is checked through the public database
     if (validation.type === "phone") {
-        window.location.hash = CONFIG.DB_ROUTE;
+        window.location.hash = `${CONFIG.DB_ROUTE}?q=${encodeURIComponent(value)}`;
         return;
     }
 
@@ -275,8 +275,7 @@ async function scanMessage() {
         displayResults(results);
     } catch (error) {
         if (error.name === "AbortError") {
-            showError(
-                "The scan took longer than 20 seconds and timed out. Please check your internet connection and try again."
+            showError("The scan took longer than 20 seconds and timed out. Please check your internet connection and try again."
             );
         } else {
             showError(
@@ -288,7 +287,6 @@ async function scanMessage() {
         elements.scanButton.textContent = "Scan now";
     }
 }
-
 // clears input, errors and results
 function clearResults() {
     if (elements.input) {
@@ -302,8 +300,6 @@ function clearResults() {
 
     clearError();
 }
-
-
 // Handle navigation
 function handleNavigation() {
     const route = window.location.hash;
@@ -315,7 +311,6 @@ function handleNavigation() {
         });
     }
 }
-
 // Connects the all buttons to their own functions
 function attachEventListeners() {
     elements.scanButton?.addEventListener("click", scanMessage);
@@ -331,13 +326,11 @@ function attachEventListeners() {
 
     window.addEventListener("hashchange", handleNavigation);
 }
-
 // Initialize the application
 function initializeApp() {
     if (elements.result) {
         elements.result.hidden = true;
     }
-
     clearError();
     attachEventListeners();
     handleNavigation();
