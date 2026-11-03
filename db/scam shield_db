@@ -136,19 +136,19 @@ CREATE VIEW public_reports AS
 SELECT
     r.id,
     c.code AS category,
+    c.name AS category_name,
     s.sender_type,
     s.value AS sender,
     r.redacted_content,
     r.submission_count,
-    r.approved_at,
+    COALESCE(r.approved_at, r.created_at) AS approved_at,
+    r.language,
     r.search_vector
-FROM
+FROM scam_reports r
+JOIN scam_categories c ON c.id = r.category_id
+LEFT JOIN senders s ON s.id = r.sender_id
+WHERE r.status = 'approved';
     scam_reports r
-    JOIN scam_categories c ON c.id = r.category_id
-    LEFT JOIN senders s ON s.id = r.sender_id
-WHERE
-    r.status = 'approved';
-
 CREATE VIEW sender_report_counts AS
 SELECT s.id AS sender_id, s.sender_type, s.value, count(*) AS report_count
 FROM scam_reports r
