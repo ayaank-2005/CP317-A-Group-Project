@@ -1,10 +1,12 @@
+
 // api/index.go  (Vercel serverless entrypoint)
-// Scan code is unchanged from before. New: the router at the bottom, and the two database endpoints 
+// Scan code is unchanged from before. New: the router at the bottom, and the two database endpoints
 package handler
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
@@ -40,6 +42,19 @@ func openStore(_ context.Context) (reports.Searcher, error) {
 var (
 	searchHandler     = reports.Search(openStore)
 	categoriesHandler = reports.Categories(openStore)
+	submitHandler     = reports.Submit(func(ctx context.Context) (reports.Submitter, error) {
+		s, err := openStore(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		submitter, ok := s.(reports.Submitter)
+		if !ok {
+			return nil, errors.New("report submission is unavailable")
+		}
+
+		return submitter, nil
+	})
 )
 
 // ---- scanner (unchanged) ----
@@ -157,7 +172,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	case "scan":
 		scan(w, r)
 	case "reports":
-		searchHandler(w, r)
+		if r.Method == http.MethodPost {
+			submitHandler(w, r)
+		} else if r.Method == http.MethodGet {
+			searchHandler(w, r)
+		} else {
+			w.Header().Set("Allow", "GET, POST")
+			writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "That kind of request isn't supported."})
+		}
 	case "categories":
 		categoriesHandler(w, r)
 	default:
