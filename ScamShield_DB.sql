@@ -27,7 +27,7 @@ CREATE TABLE users (
 
 CREATE UNIQUE INDEX uq_users_email ON users (lower(email));
 
-REATE TABLE scam_categories (
+CREATE TABLE scam_categories (
     id SMALLSERIAL PRIMARY KEY,
     code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL
@@ -43,17 +43,6 @@ VALUES ('bank', 'Bank impersonation'),
     ('romance', 'Romance scam'),
     ('investment', 'Investment scam'),
     ('other', 'Other');
-
-CREATE TABLE report_submissions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
-    report_id UUID NOT NULL REFERENCES scam_reports (id) ON DELETE CASCADE,
-    submitter_id UUID REFERENCES users (id), -- NULL = anonymous
-    redacted_content TEXT NOT NULL,
-    redaction_count SMALLINT NOT NULL DEFAULT 0, -- shown as "2 personal details masked"
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE INDEX idx_submissions_report ON report_submissions (report_id);
 
 CREATE TABLE senders (
     id BIGSERIAL PRIMARY KEY,
@@ -89,6 +78,7 @@ CREATE TABLE scam_reports (
     review_threshold INT NOT NULL DEFAULT 5,
     merged_into_id UUID REFERENCES scam_reports (id),
     reviewed_by UUID REFERENCES users (id),
+    reviewed_at TIMESTAMPTZ, -- when a moderator approved, rejected or merged it
     approved_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     search_vector tsvector GENERATED ALWAYS AS (
@@ -131,3 +121,10 @@ CREATE TABLE report_submissions (
 );
 
 CREATE INDEX idx_submissions_report ON report_submissions (report_id);
+
+-- UI-6: "My Reports" lists a user's own submissions, newest first
+CREATE INDEX idx_submissions_submitter ON report_submissions (submitter_id, created_at DESC)
+WHERE
+    submitter_id IS NOT NULL;
+
+COMMIT;

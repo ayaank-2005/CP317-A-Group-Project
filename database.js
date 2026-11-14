@@ -347,6 +347,76 @@
         }
     }
 
+    // Single public report (#database?report=<id>). A merged report's ID
+    // leads to the report it was merged into.
+    async function showReport(id, mergedFrom) {
+        if (state.controller) state.controller.abort();
+
+        const controller = new AbortController();
+        state.controller = controller;
+
+        const timer = setTimeout(() => controller.abort(), DB_CONFIG.TIMEOUT);
+
+        showLoading();
+        ui.status.textContent = "Loading report…";
+
+        const back = el("div", { class: "row" },
+            el("button", { type: "button", text: "← Back to all reports", onclick: resetSearch })
+        );
+
+        try {
+            const response = await fetch(`${DB_CONFIG.API_BASE}/api/reports/${encodeURIComponent(id)}`, {
+                signal: controller.signal,
+                headers: { Accept: "application/json" }
+            });
+
+            if (response.status === 404) {
+                ui.status.textContent = "";
+                ui.results.replaceChildren(
+                    el("div", { class: "state" },
+                        el("h2", { text: "This report isn't public" }),
+                        el("p", { text: "It may still be waiting for review, or a moderator decided not to publish it." }),
+                        back
+                    )
+                );
+                return;
+            }
+
+            if (!response.ok) throw new Error("The server had a problem. Please try again in a moment.");
+
+            const data = await response.json();
+
+            if (data.mergedInto && !mergedFrom) {
+                history.replaceState(null, "", `#database?report=${encodeURIComponent(data.mergedInto)}`);
+                showReport(data.mergedInto, id);
+                return;
+            }
+
+            if (!data.report) throw new Error("We couldn't load that report.");
+
+            ui.status.textContent = "Public report";
+            ui.results.replaceChildren(
+                mergedFrom
+                    ? el("p", { class: "notice", text: "That report was merged into this one about the same scam." })
+                    : null,
+                reportCard(data.report),
+                back
+            );
+        } catch (error) {
+            if (state.controller !== controller) return;
+
+            if (error.name === "AbortError") {
+                showError("Loading the report took too long. Please check your connection and try again.");
+            } else if (error instanceof TypeError) {
+                showError("We couldn't reach the server. Please check your connection and try again.");
+            } else {
+                showError(error.message);
+            }
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
     function onSubmit(event) {
         event.preventDefault();
 
@@ -395,6 +465,13 @@
         }
 
         const params = event.detail.params;
+        const reportId = params.get("report");
+
+        if (reportId) {
+            ui.pager.classList.add("hidden");
+            showReport(reportId);
+            return;
+        }
 
         state.q = (params.get("q") || "").trim().slice(0, DB_CONFIG.MAX_QUERY_LENGTH);
         state.category = params.get("category") || "";

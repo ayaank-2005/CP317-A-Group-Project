@@ -1,10 +1,12 @@
-// Shows one page at a time (#home, #database, #report, #sign-in).
+// Shows one page at a time (#home, #database, #report, #my-reports, #moderate, #sign-in).
 
 (function () {
     const VIEWS = {
         "home": "v-scan",
         "database": "v-db",
         "report": "v-report",
+        "my-reports": "v-myreports",
+        "moderate": "v-moderate",
         "sign-in": "v-signin"
     };
 
