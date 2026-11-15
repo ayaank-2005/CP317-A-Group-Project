@@ -1,5 +1,6 @@
 -- ScamShield schema (PostgreSQL 14+)
 
+BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- gen_random_uuid()
@@ -35,21 +36,12 @@ CREATE TABLE scam_categories (
 INSERT INTO
     scam_categories (code, name)
 VALUES ('bank', 'Bank impersonation'),
-    (
-        'delivery',
-        'Fake delivery notice'
-    ),
+    ('delivery', 'Fake delivery notice'),
     ('job', 'Job scam'),
-    (
-        'government',
-        'Government / CRA impersonation'
-    ),
+    ('government', 'Government / CRA impersonation'),
     ('phishing', 'Phishing'),
     ('romance', 'Romance scam'),
-    (
-        'investment',
-        'Investment scam'
-    ),
+    ('investment', 'Investment scam'),
     ('other', 'Other');
 
 CREATE TABLE senders (
@@ -86,6 +78,7 @@ CREATE TABLE scam_reports (
     review_threshold INT NOT NULL DEFAULT 5,
     merged_into_id UUID REFERENCES scam_reports (id),
     reviewed_by UUID REFERENCES users (id),
+    reviewed_at TIMESTAMPTZ, -- when a moderator approved, rejected or merged it
     approved_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     search_vector tsvector GENERATED ALWAYS AS (
@@ -129,9 +122,16 @@ CREATE TABLE report_submissions (
 
 CREATE INDEX idx_submissions_report ON report_submissions (report_id);
 
+-- UI-6: "My Reports" lists a user's own submissions, newest first
+CREATE INDEX idx_submissions_submitter ON report_submissions (submitter_id, created_at DESC)
+WHERE
+    submitter_id IS NOT NULL;
+
 -- ---------------------------------------------------------------
--- Views: public data and REP-2. Only approved reports count; merged/pending/rejected never do.
+-- Views: public data and REP-2
+-- Only approved reports count.
 -- ---------------------------------------------------------------
+
 CREATE VIEW public_reports AS
 SELECT
     r.id,
@@ -148,47 +148,52 @@ FROM scam_reports r
 JOIN scam_categories c ON c.id = r.category_id
 LEFT JOIN senders s ON s.id = r.sender_id
 WHERE r.status = 'approved';
-    scam_reports r
+
 CREATE VIEW sender_report_counts AS
-SELECT s.id AS sender_id, s.sender_type, s.value, count(*) AS report_count
-FROM scam_reports r
-    JOIN senders s ON s.id = r.sender_id
-WHERE
-    r.status = 'approved'
-GROUP BY
-    s.id,
+SELECT
+    s.id AS sender_id,
     s.sender_type,
-    s.value;
+    s.value,
+    count(*) AS report_count
+FROM scam_reports r
+JOIN senders s ON s.id = r.sender_id
+WHERE r.status = 'approved'
+GROUP BY s.id, s.sender_type, s.value;
 
 -- ---------------------------------------------------------------
--- MOD-1 moderation: the record of every approve / reject / merge decision.
--- (The same block is in db/moderation.sql for databases that already exist.)
--- Not sure about user accounts yet, so a decision stores the moderator's typed name.
+-- MOD-1 moderation decisions
 -- ---------------------------------------------------------------
+
 CREATE TABLE IF NOT EXISTS moderation_decisions (
-    id             BIGSERIAL PRIMARY KEY,
-    report_id      UUID        NOT NULL REFERENCES scam_reports (id),
-    moderator      TEXT        NOT NULL CHECK (char_length(moderator) BETWEEN 2 AND 60),
-    decision       TEXT        NOT NULL CHECK (decision IN ('approved', 'rejected', 'merged')),
-    merged_into_id UUID        REFERENCES scam_reports (id),
-    reason         TEXT,
-    decided_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id BIGSERIAL PRIMARY KEY,
+    report_id UUID NOT NULL REFERENCES scam_reports (id),
+    moderator TEXT NOT NULL CHECK (char_length(moderator) BETWEEN 2 AND 60),
+    decision TEXT NOT NULL CHECK (decision IN ('approved', 'rejected', 'merged')),
+    merged_into_id UUID REFERENCES scam_reports (id),
+    reason TEXT,
+    decided_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     CHECK (decision <> 'merged' OR merged_into_id IS NOT NULL),
     CHECK (decision = 'merged' OR merged_into_id IS NULL),
     CHECK (reason IS NULL OR char_length(reason) <= 500)
 );
 
-CREATE INDEX IF NOT EXISTS idx_decisions_report ON moderation_decisions (report_id);
-CREATE INDEX IF NOT EXISTS idx_decisions_time   ON moderation_decisions (decided_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS idx_decisions_report
+ON moderation_decisions (report_id);
 
--- The record is append-only: a row can never be edited or removed, not even by the application.
-CREATE OR REPLACE FUNCTION moderation_decisions_readonly() RETURNS trigger AS $$
+CREATE INDEX IF NOT EXISTS idx_decisions_time
+ON moderation_decisions (decided_at DESC, id DESC);
+
+CREATE OR REPLACE FUNCTION moderation_decisions_readonly()
+RETURNS trigger AS $$
 BEGIN
     RAISE EXCEPTION 'moderation_decisions is append-only';
 END;
 $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS trg_decisions_readonly ON moderation_decisions;
+
 CREATE TRIGGER trg_decisions_readonly
     BEFORE UPDATE OR DELETE ON moderation_decisions
     FOR EACH ROW EXECUTE FUNCTION moderation_decisions_readonly();
+COMMIT;
+

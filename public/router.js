@@ -5,7 +5,7 @@
         "home": "v-scan",
         "database": "v-db",
         "report": "v-report",
-        "sign-in": "v-signin"
+        "sign-in": "v-signin",
         "moderation": "v-mod"
     };
 
