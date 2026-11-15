@@ -6,6 +6,7 @@
         "database": "v-db",
         "report": "v-report",
         "sign-in": "v-signin"
+        "moderation": "v-mod"
     };
 
     const DEFAULT_VIEW = "home";
