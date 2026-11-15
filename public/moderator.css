@@ -1,0 +1,229 @@
+/* Review page for moderators. Uses the colour variables from Styling.css and the .report, .tag,
+   .mask, .sender, .pager, .state and .linklike styles from database.css, so load it after both. */
+
+/* the page keeps the tab look it used to share with the sign-in page, so it has no other dependency */
+.mod-tabs {
+    display: flex;
+    gap: 4px;
+    max-width: 360px;
+    margin-bottom: 14px;
+    padding: 3px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+}
+
+.mod-tab {
+    flex: 1;
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: transparent;
+    font-size: 15px;
+}
+
+.mod-tab[aria-selected="true"] {
+    background: #171717;
+    color: #ffffff;
+}
+
+.mod-tab:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* "Reviewing as … [Lock]" */
+.mod-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.mod-lock {
+    padding: 6px 14px;
+    font-size: 14px;
+}
+
+/* the access gate */
+.mod-gate {
+    max-width: 460px;
+}
+
+.mod-gap {
+    margin-top: 14px;
+}
+
+.mod-gate input {
+    display: block;
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1.5px solid var(--ink);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.mod-gate input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* the error box from Styling.css is hidden with display:none until a script shows it */
+.mod-err {
+    display: block;
+}
+
+.mod-err.hidden {
+    display: none;
+}
+
+.mod-notice {
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mod-notice.ok {
+    color: var(--ok);
+    background: var(--okbg);
+    border: 1px solid var(--ok);
+}
+
+.mod-card {
+    margin-bottom: 14px;
+}
+
+.mod-actions {
+    margin-top: 12px;
+}
+
+.mod-panel {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+}
+
+.mod-panel.hidden {
+    display: none;
+}
+
+.mod-panel input[type="text"],
+.mod-panel textarea {
+    display: block;
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1.5px solid var(--ink);
+    border-radius: 10px;
+    padding: 9px 12px;
+    margin-top: 8px;
+}
+
+.mod-panel textarea {
+    resize: vertical;
+}
+
+.mod-panel input:focus-visible,
+.mod-panel textarea:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* the merge target list */
+.mod-candidates {
+    display: grid;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.mod-candidate {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+}
+
+.mod-candidate:has(input:checked) {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.mod-candidate input {
+    margin-top: 4px;
+    accent-color: var(--accent);
+}
+
+.mod-candidate-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.mod-candidate-text {
+    display: block;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+/* the decision record */
+.mod-history {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.mod-log {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--warn);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.mod-log.approved { border-left-color: var(--ok); }
+.mod-log.rejected { border-left-color: var(--bad); }
+
+.mod-log-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    align-items: center;
+}
+
+.mod-log p {
+    margin: 6px 0 0;
+}
+
+.mod-reason {
+    font-style: italic;
+    overflow-wrap: anywhere;
+}
+
+.mod-notice.hidden {
+    display: none;
+}
+
+@media (max-width: 520px) {
+    .mod-gate input,
+    .mod-panel input[type="text"],
+    .mod-panel textarea {
+        font-size: 16px; /* stops iPhones zooming in when the field is focused */
+    }
+}

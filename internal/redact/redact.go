@@ -21,10 +21,6 @@ var rules = []rule{
 		label:   "[EMAIL]",
 	},
 	{
-		pattern: regexp.MustCompile(`(?i)(?:\+?1[ .-]?)?(?:\([2-9][0-9]{2}\)|\b[2-9][0-9]{2})[ .-]?[2-9][0-9]{2}[ .-]?[0-9]{4}\b(?:[ \t]*(?:ext\.?|x)[ \t]*[0-9]+)?`),
-		label:   "[PHONE]",
-	},
-	{
 		pattern: regexp.MustCompile(`\b[0-9](?:[ -]?[0-9]){12,15}\b`),
 		label:   "[CARD]",
 	},
@@ -33,7 +29,11 @@ var rules = []rule{
 		label:   "[SIN]",
 	},
 	{
-		pattern: regexp.MustCompile(`(?i)\b[0-9]{1,6}[ \t]+(?:[A-Z][A-Z.'’-]*[ \t]+){1,5}(?:street|st|road|rd|avenue|ave|drive|dr|lane|ln|court|ct|boulevard|blvd|crescent|cres)\b(?:[ \t]+(?:north|south|east|west|n|s|e|w)\b)?(?:,?[ \t]+(?:unit|apt\.?|suite)[ \t]+[A-Z0-9-]+)?`),
+		pattern: regexp.MustCompile(`(?i)(?:\+?1[ .-]?)?(?:\([2-9][0-9]{2}\)|\b[2-9][0-9]{2})[ .-]?[2-9][0-9]{2}[ .-]?[0-9]{4}\b(?:[ \t]*(?:ext\.?|x)[ \t]*[0-9]+)?`),
+		label:   "[PHONE]",
+	},
+	{
+		pattern: regexp.MustCompile(`\b[0-9]{1,6}[ \t]+(?:\p{Lu}[\p{L}.'’-]*[ \t]+){1,3}(?i:street|st|road|rd|avenue|ave|drive|dr|lane|ln|court|ct|boulevard|blvd|crescent|cres)\b(?i:[ \t]+(?:north|south|east|west|n|s|e|w)\b)?(?i:,?[ \t]+(?:unit|apt\.?|suite)[ \t]+[A-Z0-9-]+)?`),
 		label:   "[ADDRESS]",
 	},
 	{

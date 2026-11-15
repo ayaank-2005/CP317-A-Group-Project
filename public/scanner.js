@@ -1,5 +1,3 @@
-
-
 const CONFIG = {
     ENGINE_URL: "/api/scan",
     TIMEOUT: 20000,
@@ -84,10 +82,11 @@ function validateInput(value) {
     if (type === "phone") {
         const digits = input.replace(/\D/g, "");
 
-        if (digits.length !== 10) {
+        // 10 digits, or 11 starting with 1 (e.g. +1 416 555 0100)
+        if (!(digits.length === 10 || (digits.length === 11 && digits.startsWith("1")))) {
             return {
                 valid: false,
-                message: "Please enter a valid 10-digit phone number."
+                message: "Please enter a valid 10-digit phone number (a leading +1 is fine)."
             };
         }
 
@@ -140,7 +139,17 @@ async function scanWithEngine(value, type) {
         });
 
         if (!response.ok) {
-            throw new Error("Scanning request failed.");
+            let message = "Our scanning service had a problem. Please try again in a moment.";
+
+            if (response.status === 413) {
+                message = "Your submission is too large. Please shorten it and try again.";
+            } else if (response.status === 429) {
+                message = "Too many scans in a short time. Please wait a minute and try again.";
+            } else if (response.status === 504) {
+                message = "The scan took too long to finish. Please try again, or try a shorter message.";
+            }
+
+            return { status: "error", message: message };
         }
 
         return await response.json();
@@ -200,11 +209,10 @@ function displayResults(data) {
             <h2>Scan Results</h2>
             <p><strong>Verdict:</strong> ${escapeHTML(verdict)}</p>
             <p>${escapeHTML(explanation)}</p>
-            ${
-                flags.length
-                    ? `<ul>${flags.map(flag => `<li>${escapeHTML(flag)}</li>`).join("")}</ul>`
-                    : "<p>No specific warning signs were returned.</p>"
-            }
+            ${flags.length
+            ? `<ul>${flags.map(flag => `<li>${escapeHTML(flag)}</li>`).join("")}</ul>`
+            : "<p>No specific warning signs were returned.</p>"
+        }
         </div>
     `;
 }
@@ -267,8 +275,7 @@ async function scanMessage() {
         displayResults(results);
     } catch (error) {
         if (error.name === "AbortError") {
-            showError(
-                "The scan took longer than 20 seconds and timed out. Please check your internet connection and try again."
+            showError("The scan took longer than 20 seconds and timed out. Please check your internet connection and try again."
             );
         } else {
             showError(
@@ -280,7 +287,6 @@ async function scanMessage() {
         elements.scanButton.textContent = "Scan now";
     }
 }
-
 // clears input, errors and results
 function clearResults() {
     if (elements.input) {
@@ -294,8 +300,6 @@ function clearResults() {
 
     clearError();
 }
-
-
 // Handle navigation
 function handleNavigation() {
     const route = window.location.hash;
@@ -307,7 +311,6 @@ function handleNavigation() {
         });
     }
 }
-
 // Connects the all buttons to their own functions
 function attachEventListeners() {
     elements.scanButton?.addEventListener("click", scanMessage);
@@ -323,18 +326,14 @@ function attachEventListeners() {
 
     window.addEventListener("hashchange", handleNavigation);
 }
-
 // Initialize the application
 function initializeApp() {
     if (elements.result) {
         elements.result.hidden = true;
     }
-
     clearError();
     attachEventListeners();
     handleNavigation();
 }
 
 initializeApp();
-
-

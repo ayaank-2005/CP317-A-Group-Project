@@ -4,18 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
-    <title>ScamShield – Stay Secured and  Online</title>
-
+    <title>ScamShield – Stay Secured and Online</title>
 
     <link rel="stylesheet" href="Styling.css">
     <link rel="stylesheet" href="database.css">
-    <link rel="stylesheet" href="account.css">
+    <link rel="stylesheet" href="report.css">
+    <link rel="stylesheet" href="moderator.css">
 </head>
-
 <body>
     <div class="wrap">
-
         <header class="top">
             <div class="brand">Scam Shield</div>
 
@@ -23,11 +20,8 @@
                 <a href="#home" data-view="home">Home</a>
                 <a href="#database" data-view="database">Database</a>
                 <a href="#report" data-view="report">Report</a>
-                <a href="#my-reports" data-view="my-reports">My Reports</a>
-                <a href="#moderate" data-view="moderate" data-role="moderator" class="hidden">Moderate</a>
-                <a href="#sign-in" data-view="sign-in" class="signin">
-                    Sign in
-                </a>
+                <a href="#moderation" data-view="moderation" data-role="moderator" class="hidden">Moderate</a>
+                <a href="#sign-in" data-view="sign-in" class="signin">Sign in</a>
             </nav>
         </header>
 
@@ -44,10 +38,7 @@
                     Message, link or phone number
                 </label>
 
-                <textarea
-                    id="input"
-                    placeholder="Paste a suspicious message, a link, or a phone number"
-                ></textarea>
+                <textarea id="input" placeholder="Paste a suspicious message, a link, or a phone number"></textarea>
 
                 <div class="row">
                     <button class="primary" id="scanBtn" type="button">
@@ -85,21 +76,20 @@
 
         <main id="v-report" class="hidden"></main>
 
-        <main id="v-myreports" class="hidden"></main>
-
-        <main id="v-moderate" class="hidden"></main>
-
         <main id="v-signin" class="hidden"></main>
 
+        <main id="v-mod" class="hidden"></main>
     </div>
 
     <script src="scanner.js"></script>
-    <script src="ui.js"></script>
-    <script src="auth.js"></script>
     <script src="router.js"></script>
     <script src="database.js"></script>
     <script src="report.js"></script>
-    <script src="myreports.js"></script>
-    <script src="moderate.js"></script>
+    <script src="moderator.js"></script>
 </body>
 </html>
+
+
+
+
+

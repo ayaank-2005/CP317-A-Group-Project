@@ -127,4 +127,73 @@ CREATE INDEX idx_submissions_submitter ON report_submissions (submitter_id, crea
 WHERE
     submitter_id IS NOT NULL;
 
+-- ---------------------------------------------------------------
+-- Views: public data and REP-2
+-- Only approved reports count.
+-- ---------------------------------------------------------------
+
+CREATE VIEW public_reports AS
+SELECT
+    r.id,
+    c.code AS category,
+    c.name AS category_name,
+    s.sender_type,
+    s.value AS sender,
+    r.redacted_content,
+    r.submission_count,
+    COALESCE(r.approved_at, r.created_at) AS approved_at,
+    r.language,
+    r.search_vector
+FROM scam_reports r
+JOIN scam_categories c ON c.id = r.category_id
+LEFT JOIN senders s ON s.id = r.sender_id
+WHERE r.status = 'approved';
+
+CREATE VIEW sender_report_counts AS
+SELECT
+    s.id AS sender_id,
+    s.sender_type,
+    s.value,
+    count(*) AS report_count
+FROM scam_reports r
+JOIN senders s ON s.id = r.sender_id
+WHERE r.status = 'approved'
+GROUP BY s.id, s.sender_type, s.value;
+
+-- ---------------------------------------------------------------
+-- MOD-1 moderation decisions
+-- ---------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS moderation_decisions (
+    id BIGSERIAL PRIMARY KEY,
+    report_id UUID NOT NULL REFERENCES scam_reports (id),
+    moderator TEXT NOT NULL CHECK (char_length(moderator) BETWEEN 2 AND 60),
+    decision TEXT NOT NULL CHECK (decision IN ('approved', 'rejected', 'merged')),
+    merged_into_id UUID REFERENCES scam_reports (id),
+    reason TEXT,
+    decided_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CHECK (decision <> 'merged' OR merged_into_id IS NOT NULL),
+    CHECK (decision = 'merged' OR merged_into_id IS NULL),
+    CHECK (reason IS NULL OR char_length(reason) <= 500)
+);
+
+CREATE INDEX IF NOT EXISTS idx_decisions_report
+ON moderation_decisions (report_id);
+
+CREATE INDEX IF NOT EXISTS idx_decisions_time
+ON moderation_decisions (decided_at DESC, id DESC);
+
+CREATE OR REPLACE FUNCTION moderation_decisions_readonly()
+RETURNS trigger AS $$
+BEGIN
+    RAISE EXCEPTION 'moderation_decisions is append-only';
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_decisions_readonly ON moderation_decisions;
+
+CREATE TRIGGER trg_decisions_readonly
+    BEFORE UPDATE OR DELETE ON moderation_decisions
+    FOR EACH ROW EXECUTE FUNCTION moderation_decisions_readonly();
 COMMIT;
+
