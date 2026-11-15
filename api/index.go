@@ -24,6 +24,29 @@ var (
 	db *store.Store
 )
 
+func getDB() (*store.Store, error) {
+	mu.Lock()
+	defer mu.Unlock()
+	if db == nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second) // the pool outlives one request
+		defer cancel()
+		s, err := store.New(ctx)
+		if err != nil {
+			return nil, err
+		}
+		db = s
+	}
+	return db, nil
+}
+
+func openMod(_ context.Context) (moderation.Store, error) {
+	s, err := getDB()
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
 func openStore(_ context.Context) (reports.Searcher, error) {
 	mu.Lock()
 	defer mu.Unlock()
